@@ -1,0 +1,130 @@
+html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biometric Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .biometric-status {
+            padding: 20px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .status-active {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .status-inactive {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        .biometric-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Biometric Auth System</a>
+        <div class="navbar-nav ml-auto">
+            <a class="nav-item nav-link" href="/logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2>Welcome, {{ user.username }}</h2>
+        
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Biometric Status</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="biometric-status {% if user.facial_data %}status-active{% else %}status-inactive{% endif %}">
+                            <h5>Facial Recognition</h5>
+                            <p>Status: {% if user.facial_data %}Enabled{% else %}Not Configured{% endif %}</p>
+                            {% if not user.facial_data %}
+                            <a href="/setup/facial" class="btn btn-primary">Setup Facial Recognition</a>
+                            {% endif %}
+                        </div>
+
+                        <div class="biometric-status {% if user.voice_data %}status-active{% else %}status-inactive{% endif %}">
+                            <h5>Voice Recognition</h5>
+                            <p>Status: {% if user.voice_data %}Enabled{% else %}Not Configured{% endif %}</p>
+                            {% if not user.voice_data %}
+                            <a href="/setup/voice" class="btn btn-primary">Setup Voice Recognition</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Recent Activity</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if login_history %}
+                            {% for entry in login_history %}
+                            <div class="biometric-card">
+                                <p><strong>Time:</strong> {{ entry.timestamp }}</p>
+                                <p><strong>Method:</strong> {{ entry.auth_method }}</p>
+                                <p><strong>Status:</strong> 
+                                    <span class="{% if entry.success %}text-success{% else %}text-danger{% endif %}">
+                                        {{ 'Success' if entry.success else 'Failed' }}
+                                    </span>
+                                </p>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p>No recent login activity</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Security Settings</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="/update_settings">
+                            <div class="form-group">
+                                <label>Two-Factor Authentication</label>
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="twoFactorAuth" 
+                                           name="two_factor" {% if user.two_factor_enabled %}checked{% endif %}>
+                                    <label class="custom-control-label" for="twoFactorAuth">Enable</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Login Notification Emails</label>
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="loginNotifications" 
+                                           name="login_notifications" {% if user.notifications_enabled %}checked{% endif %}>
+                                    <label class="custom-control-label" for="loginNotifications">Enable</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save Settings</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
